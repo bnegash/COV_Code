@@ -28,11 +28,13 @@ window.resizable(width=False, height=False)
 # About Window
 def success_popup():
     success_window = Toplevel(window)
-    success_window.geometry("280x200")
+    success_window.geometry("280x250")
     success_window.title("Success!")
     # success_window.iconbitmap('itlogo_icon.ico')
     success_window.resizable(width=False, height=False)
-    Label(success_window, text="Tel Directory has been Updated!", font="Verdana 12 underline").grid(row=0, column=0,
+
+    # Display information in the success popup
+    Label(success_window, text="Tel Directory Has Been Updated!", font="Verdana 12 underline").grid(row=0, column=0,
                                                                                                     pady=10,
                                                                                                     columnspan=2)
     Label(success_window, text=f"Full Name:     {full_name_var.get()}").grid(row=1, column=0, sticky=W, padx=5, pady=10)
@@ -40,13 +42,20 @@ def success_popup():
     Label(success_window, text=f"Direct Line:   {direct_var.get()}").grid(row=3, column=0, sticky=W, padx=5, pady=10)
     Label(success_window, text=f"Location:      {location_var.get()}").grid(row=4, column=0, sticky=W, padx=5, pady=10)
 
-    def close_success_window():
-        success_window.destroy()
-        clear_form()
-    ok_button = tkinter.Button(success_window, text="OK", command=close_success_window)
-    ok_button.grid(row=5, column=0, columnspan=2, pady=10)
+    # Function to clear the form entries in the main window and close the success window
+    def clear_main_form(event=None):
+        clear_form()  # Clear the form entries in the main window
+        success_window.destroy()  # Close the success window
+
+    # Bind the clear_main_form function to the Destroy event of the success window
+    success_window.bind("<Destroy>", clear_main_form)
+
+    close_button = tkinter.Button(success_window, text="Close", width=25, bg='blue', fg='white',
+                                  command=clear_main_form)
+    close_button.grid(row=5, column=0, padx=5, pady=10)
 
 
+# Function to handle the database query and displaying the success popup
 def run_query():
     # conn = pyodbc.connect(r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=\\app1\phone\phonelist.mdb;")
     conn = pyodbc.connect(r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=D:\phone db\phone db\phonelist.mdb;")
@@ -56,6 +65,7 @@ def run_query():
     if extension_var.get() == "" or full_name_var.get() == "" or location_var.get() == "":
         log("Not enough Values")
     else:
+        # If direct_var is empty, replace it with a space
         if direct_var.get() == "":
             direct_var.set(" ")
 
@@ -71,16 +81,17 @@ def run_query():
             cursor.execute(
                 f"UPDATE tblphone SET Name = '{full_name_var.get()}', DID = '{direct_var.get()}' , Location = '{location_var.get()}' WHERE Extension = '{extension_var.get()}'")
             log("Insert New Record Query")
-            cursor.commit()
+
+        cursor.commit()
         success_popup()
 
 
-# Clear form function
+# Clear form entries function
 def clear_form():
-    full_name_var.set("")
-    extension_var.set("")
-    direct_var.set("")
-    location_var.set("")
+    full_name_var.set(" ")
+    extension_var.set(" ")
+    direct_var.set(" ")
+    location_var.set(" ")
 
 
 # Labels / Buttons
@@ -103,10 +114,10 @@ Label(window, text="* are Required Fields").grid(row=5, column=0, sticky=W, padx
 
 # Submit Entries
 color_button = tkinter.Button
-submit_button = color_button(window, text="Submit", width=25, bg='blue', fg='white', command=run_query).grid(row=40,
-                                                                                                             column=0,
-                                                                                                             pady=15,
-                                                                                                             columnspan=2)
+color_button(window, text="Submit", width=25, bg='blue', fg='white', command=run_query).grid(row=40,
+                                                                                             column=0,
+                                                                                             pady=15,
+                                                                                             columnspan=2)
 
 # Create Windows & Main Loop
 mainloop()
